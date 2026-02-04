@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Seats | Sales Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .print-card { border: 1px solid #e2e8f0; break-inside: avoid; box-shadow: none !important; }
+            .max-w-7xl { max-width: 100%; }
+        }
+        .active-tab { 
+            background: #4f46e5; 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); 
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            border-color: #c7d2fe;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 min-h-screen pb-12">
+
+    <!-- Top Navigation -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-30 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    </div>
+                    <span class="font-extrabold text-xl tracking-tight text-slate-900">Super Seats <span class="text-indigo-600">Pro</span></span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="window.print()" class="text-slate-600 hover:text-indigo-600 font-semibold text-sm flex items-center gap-2 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        Export PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <!-- Header Section -->
+        <header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div class="animate-in fade-in duration-700">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700 uppercase tracking-widest">Internal Report</span>
+                    <span id="updateTag" class="text-slate-400 text-[10px] font-medium uppercase tracking-widest">Updated Today</span>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Sales Intelligence Dashboard</h1>
+                <p id="subLabel" class="text-slate-500 mt-2 font-medium">Comparative Analysis of Multi-Month Performance Periods</p>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-col gap-3 no-print">
+                <div class="flex items-center bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                    <button id="viewAgg" onclick="setView('aggregate')" class="px-4 py-2 rounded-lg text-xs font-bold transition active-tab">Aggregate View</button>
+                    <button id="viewMonthly" onclick="setView('monthly')" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 transition">Monthly Detail</button>
+                </div>
+                
+                <div id="monthSelector" class="hidden flex items-center bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                    <button id="mNov" onclick="setMonth(0)" class="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold transition active-tab">Nov</button>
+                    <button id="mDec" onclick="setMonth(1)" class="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 transition">Dec</button>
+                    <button id="mJan" onclick="setMonth(2)" class="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 transition">Jan</button>
+                </div>
+
+                <div class="flex items-center bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                    <button id="metQty" onclick="setMetric('qty')" class="flex-1 px-4 py-2 rounded-lg text-xs font-bold transition active-tab">Volume</button>
+                    <button id="metAmt" onclick="setMetric('amt')" class="flex-1 px-4 py-2 rounded-lg text-xs font-bold text-slate-500 transition">Revenue</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Comparative Grid -->
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
+            <!-- Previous Period -->
+            <section>
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 id="titleY1" class="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Baseline Period</h2>
+                        <div class="h-1 w-12 bg-slate-200 mt-2 rounded-full"></div>
+                    </div>
+                    <span class="text-[10px] font-black text-slate-300">PY DATA</span>
+                </div>
+                <div id="gridY1" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+            </section>
+
+            <!-- Current Period -->
+            <section>
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 id="titleY2" class="text-sm font-bold text-indigo-600 uppercase tracking-[0.2em]">Current Period</h2>
+                        <div class="h-1 w-12 bg-indigo-500 mt-2 rounded-full"></div>
+                    </div>
+                    <span class="text-[10px] font-black text-indigo-300">CY DATA</span>
+                </div>
+                <div id="gridY2" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+            </section>
+        </main>
+
+        <!-- Dynamic Summary Footer -->
+        <footer id="summaryBar" class="bg-slate-900 rounded-[2rem] p-8 md:p-10 shadow-2xl relative overflow-hidden transition-all duration-500">
+            <!-- Background Decorative Element -->
+            <div class="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl"></div>
+            
+            <div class="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="border-l-2 border-indigo-500 pl-4">
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Total Period Volume</p>
+                    <div class="flex items-baseline gap-2">
+                        <p id="sumQty" class="text-3xl font-black text-white">0</p>
+                        <span class="text-xs text-slate-500 font-bold">Units</span>
+                    </div>
+                </div>
+
+                <div class="border-l-2 border-indigo-500 pl-4">
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Total Period Revenue</p>
+                    <p id="sumAmt" class="text-3xl font-black text-white">₹0</p>
+                </div>
+
+                <div class="border-l-2 border-indigo-500 pl-4">
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Net Growth (YoY)</p>
+                    <div class="flex items-center gap-2">
+                        <p id="sumGrowth" class="text-3xl font-black text-emerald-400">+0%</p>
+                        <svg id="growthIcon" class="w-6 h-6 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path></svg>
+                    </div>
+                </div>
+
+                <div class="border-l-2 border-indigo-500 pl-4">
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Top Performing Model</p>
+                    <p id="topModel" class="text-xl font-extrabold text-indigo-300 truncate uppercase">N/A</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const rawData = {
+            models: ["IQUBE", "JUPITER 110", "JUPITER 113", "JUPITER 125", "NTORQ", "ZEST"],
+            P1: [ // Nov 24, Dec 24, Jan 25
+                { 
+                    month: "Nov '24",
+                    data: {
+                        "IQUBE": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 480, amt: 76800 }, matting: { qty: 455, amt: 72800 } },
+                        "JUPITER 110": { accessories: { qty: 10, amt: 7100 }, seatCover: { qty: 10, amt: 1600 }, matting: { qty: 10, amt: 1600 } },
+                        "JUPITER 113": { accessories: { qty: 120, amt: 88800 }, seatCover: { qty: 270, amt: 43200 }, matting: { qty: 250, amt: 40000 } },
+                        "JUPITER 125": { accessories: { qty: 15, amt: 10800 }, seatCover: { qty: 365, amt: 58400 }, matting: { qty: 485, amt: 77600 } },
+                        "NTORQ": { accessories: { qty: 10, amt: 7250 }, seatCover: { qty: 30, amt: 4800 }, matting: { qty: 10, amt: 1600 } },
+                        "ZEST": { accessories: { qty: 10, amt: 6800 }, seatCover: { qty: 70, amt: 11200 }, matting: { qty: 79, amt: 12640 } }
+                    }
+                },
+                { 
+                    month: "Dec '24",
+                    data: {
+                        "IQUBE": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 60, amt: 9600 }, matting: { qty: 60, amt: 9600 } },
+                        "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 20, amt: 3200 }, matting: { qty: 10, amt: 1600 } },
+                        "JUPITER 113": { accessories: { qty: 362, amt: 267880 }, seatCover: { qty: 1128, amt: 180480 }, matting: { qty: 662, amt: 105920 } },
+                        "JUPITER 125": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 359, amt: 57440 }, matting: { qty: 419, amt: 67040 } },
+                        "NTORQ": { accessories: { qty: 5, amt: 3625 }, seatCover: { qty: 15, amt: 2400 }, matting: { qty: 5, amt: 800 } },
+                        "ZEST": { accessories: { qty: 65, amt: 44200 }, seatCover: { qty: 35, amt: 5600 }, matting: { qty: 35, amt: 5600 } }
+                    }
+                },
+                { 
+                    month: "Jan '25",
+                    data: {
+                        "IQUBE": { accessories: { qty: 60, amt: 40500 }, seatCover: { qty: 235, amt: 37600 }, matting: { qty: 205, amt: 32800 } },
+                        "JUPITER 110": { accessories: { qty: 5, amt: 1900 }, seatCover: { qty: 1, amt: 160 }, matting: { qty: 1, amt: 160 } },
+                        "JUPITER 113": { accessories: { qty: 120, amt: 88800 }, seatCover: { qty: 120, amt: 19590 }, matting: { qty: 120, amt: 19200 } },
+                        "JUPITER 125": { accessories: { qty: 645, amt: 464400 }, seatCover: { qty: 465, amt: 74400 }, matting: { qty: 360, amt: 57600 } },
+                        "NTORQ": { accessories: { qty: 20, amt: 14500 }, seatCover: { qty: 20, amt: 3200 }, matting: { qty: 20, amt: 3200 } },
+                        "ZEST": { accessories: { qty: 30, amt: 20400 }, seatCover: { qty: 30, amt: 4800 }, matting: { qty: 30, amt: 4800 } }
+                    }
+                }
+            ],
+            P2: [ // Nov 25, Dec 25, Jan 26
+                { 
+                    month: "Nov '25",
+                    data: {
+                        "IQUBE": { accessories: { qty: 50, amt: 33750 }, seatCover: { qty: 150, amt: 24000 }, matting: { qty: 127, amt: 20320 } },
+                        "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } },
+                        "JUPITER 113": { accessories: { qty: 151, amt: 111740 }, seatCover: { qty: 170, amt: 27200 }, matting: { qty: 120, amt: 19200 } },
+                        "JUPITER 125": { accessories: { qty: 109, amt: 78480 }, seatCover: { qty: 270, amt: 43200 }, matting: { qty: 300, amt: 48000 } },
+                        "NTORQ": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } },
+                        "ZEST": { accessories: { qty: 40, amt: 27200 }, seatCover: { qty: 60, amt: 9600 }, matting: { qty: 40, amt: 6400 } }
+                    }
+                },
+                { 
+                    month: "Dec '25",
+                    data: {
+                        "IQUBE": { accessories: { qty: 100, amt: 67500 }, seatCover: { qty: 200, amt: 32000 }, matting: { qty: 180, amt: 28800 } },
+                        "JUPITER 110": { accessories: { qty: 3, amt: 1440 }, seatCover: { qty: 4, amt: 2100 }, matting: { qty: 1, amt: 160 } },
+                        "JUPITER 113": { accessories: { qty: 120, amt: 88800 }, seatCover: { qty: 340, amt: 54400 }, matting: { qty: 240, amt: 38400 } },
+                        "JUPITER 125": { accessories: { qty: 200, amt: 144000 }, seatCover: { qty: 240, amt: 38400 }, matting: { qty: 480, amt: 76800 } },
+                        "NTORQ": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } },
+                        "ZEST": { accessories: { qty: 80, amt: 54400 }, seatCover: { qty: 140, amt: 22400 }, matting: { qty: 180, amt: 28800 } }
+                    }
+                },
+                { 
+                    month: "Jan '26",
+                    data: {
+                        "IQUBE": { accessories: { qty: 100, amt: 67500 }, seatCover: { qty: 400, amt: 64000 }, matting: { qty: 400, amt: 64000 } },
+                        "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } },
+                        "JUPITER 113": { accessories: { qty: 200, amt: 148000 }, seatCover: { qty: 340, amt: 54400 }, matting: { qty: 420, amt: 67200 } },
+                        "JUPITER 125": { accessories: { qty: 200, amt: 144000 }, seatCover: { qty: 300, amt: 48000 }, matting: { qty: 540, amt: 86400 } },
+                        "NTORQ": { accessories: { qty: 10, amt: 7250 }, seatCover: { qty: 10, amt: 1600 }, matting: { qty: 10, amt: 1600 } },
+                        "ZEST": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }
+                    }
+                }
+            ]
+        };
+
+        let currentView = 'aggregate';
+        let currentMonthIdx = 0;
+        let currentMetric = 'qty';
+
+        function setView(v) {
+            currentView = v;
+            const ms = document.getElementById('monthSelector');
+            if (v === 'aggregate') {
+                ms.classList.add('hidden');
+                document.getElementById('viewAgg').classList.add('active-tab');
+                document.getElementById('viewMonthly').classList.remove('active-tab');
+                document.getElementById('subLabel').innerText = "Full Period Comparative Analysis (Nov - Jan)";
+            } else {
+                ms.classList.remove('hidden');
+                document.getElementById('viewMonthly').classList.add('active-tab');
+                document.getElementById('viewAgg').classList.remove('active-tab');
+                document.getElementById('subLabel').innerText = "Specific Month Detail for " + rawData.P2[currentMonthIdx].month;
+            }
+            render();
+        }
+
+        function setMonth(m) {
+            currentMonthIdx = m;
+            ['mNov', 'mDec', 'mJan'].forEach((id, i) => {
+                document.getElementById(id).classList.toggle('active-tab', i === m);
+                document.getElementById(id).classList.toggle('text-slate-500', i !== m);
+            });
+            document.getElementById('subLabel').innerText = "Specific Month Detail for " + rawData.P2[currentMonthIdx].month;
+            render();
+        }
+
+        function setMetric(m) {
+            currentMetric = m;
+            document.getElementById('metQty').classList.toggle('active-tab', m === 'qty');
+            document.getElementById('metQty').classList.toggle('text-slate-500', m !== 'qty');
+            document.getElementById('metAmt').classList.toggle('active-tab', m === 'amt');
+            document.getElementById('metAmt').classList.toggle('text-slate-500', m !== 'amt');
+            render();
+        }
+
+        function calculateDisplayData(period) {
+            if (currentView === 'monthly') {
+                const source = rawData[period][currentMonthIdx];
+                const processed = { month: source.month, data: {}, total: { qty: 0, amt: 0 } };
+                rawData.models.forEach(mName => {
+                    const m = source.data[mName];
+                    const subTotalQty = m.accessories.qty + m.seatCover.qty + m.matting.qty;
+                    const subTotalAmt = m.accessories.amt + m.seatCover.amt + m.matting.amt;
+                    processed.data[mName] = { ...m, total: { qty: subTotalQty, amt: subTotalAmt } };
+                    processed.total.qty += subTotalQty;
+                    processed.total.amt += subTotalAmt;
+                });
+                return processed;
+            } else {
+                const processed = { 
+                    month: period === 'P1' ? "Nov '24 - Jan '25" : "Nov '25 - Jan '26", 
+                    data: {}, 
+                    total: { qty: 0, amt: 0 } 
+                };
+                rawData.models.forEach(mName => {
+                    processed.data[mName] = { 
+                        accessories: { qty: 0, amt: 0 }, 
+                        seatCover: { qty: 0, amt: 0 }, 
+                        matting: { qty: 0, amt: 0 },
+                        total: { qty: 0, amt: 0 }
+                    };
+                    rawData[period].forEach(month => {
+                        const m = month.data[mName];
+                        processed.data[mName].accessories.qty += m.accessories.qty;
+                        processed.data[mName].accessories.amt += m.accessories.amt;
+                        processed.data[mName].seatCover.qty += m.seatCover.qty;
+                        processed.data[mName].seatCover.amt += m.seatCover.amt;
+                        processed.data[mName].matting.qty += m.matting.qty;
+                        processed.data[mName].matting.amt += m.matting.amt;
+                    });
+                    const d = processed.data[mName];
+                    d.total.qty = d.accessories.qty + d.seatCover.qty + d.matting.qty;
+                    d.total.amt = d.accessories.amt + d.seatCover.amt + d.matting.amt;
+                    processed.total.qty += d.total.qty;
+                    processed.total.amt += d.total.amt;
+                });
+                return processed;
+            }
+        }
+
+        function render() {
+            const dataY1 = calculateDisplayData('P1');
+            const dataY2 = calculateDisplayData('P2');
+            
+            document.getElementById('titleY1').innerText = dataY1.month;
+            document.getElementById('titleY2').innerText = dataY2.month;
+
+            const format = (v) => currentMetric === 'amt' ? '₹' + v.toLocaleString('en-IN') : v.toLocaleString();
+
+            const createCard = (mName, m, comparisonData, isY2) => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-2xl border border-slate-100 shadow-sm print-card card-hover transition-all duration-300";
+                
+                let growthHTML = '';
+                if (isY2 && comparisonData) {
+                    const v1 = comparisonData[currentMetric];
+                    const v2 = m.total[currentMetric];
+                    if (v1 > 0) {
+                        const diff = ((v2 - v1) / v1) * 100;
+                        const isPos = diff >= 0;
+                        growthHTML = `
+                            <span class="text-[10px] font-bold ${isPos ? 'text-emerald-500 bg-emerald-50' : 'text-rose-500 bg-rose-50'} px-2 py-0.5 rounded-full">
+                                ${isPos ? '↑' : '↓'} ${Math.abs(diff).toFixed(0)}%
+                            </span>`;
+                    } else if (v2 > 0) {
+                        growthHTML = `<span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">NEW</span>`;
+                    }
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Model</p>
+                            <h3 class="font-extrabold text-slate-800 tracking-tight">${mName}</h3>
+                        </div>
+                        ${growthHTML}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between items-end mb-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Attach Breakdown</span>
+                            <span class="text-sm font-black text-slate-900">${format(m.total[currentMetric])}</span>
+                        </div>
+                        <div class="flex h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                            <div class="bg-indigo-400" style="width: ${m.total[currentMetric] > 0 ? (m.accessories[currentMetric]/m.total[currentMetric]*100) : 0}%"></div>
+                            <div class="bg-indigo-600" style="width: ${m.total[currentMetric] > 0 ? (m.seatCover[currentMetric]/m.total[currentMetric]*100) : 0}%"></div>
+                            <div class="bg-indigo-200" style="width: ${m.total[currentMetric] > 0 ? (m.matting[currentMetric]/m.total[currentMetric]*100) : 0}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1 pt-3 border-t border-slate-50">
+                        <div>
+                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Acc</p>
+                            <p class="text-[11px] font-extrabold text-slate-700">${format(m.accessories[currentMetric])}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Seat</p>
+                            <p class="text-[11px] font-extrabold text-slate-700">${format(m.seatCover[currentMetric])}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Mat</p>
+                            <p class="text-[11px] font-extrabold text-slate-700">${format(m.matting[currentMetric])}</p>
+                        </div>
+                    </div>
+                `;
+                return card;
+            };
+
+            // Render columns
+            const g1 = document.getElementById('gridY1');
+            const g2 = document.getElementById('gridY2');
+            g1.innerHTML = ''; g2.innerHTML = '';
+
+            rawData.models.forEach(mName => {
+                g1.appendChild(createCard(mName, dataY1.data[mName], null, false));
+                g2.appendChild(createCard(mName, dataY2.data[mName], dataY1.data[mName].total, true));
+            });
+
+            // Summary Footer Logic
+            const totalQty = dataY2.total.qty;
+            const totalAmt = dataY2.total.amt;
+            const prevMetric = dataY1.total[currentMetric];
+            const currMetric = dataY2.total[currentMetric];
+            const growth = prevMetric > 0 ? ((currMetric - prevMetric) / prevMetric) * 100 : 0;
+
+            document.getElementById('sumQty').innerText = totalQty.toLocaleString();
+            document.getElementById('sumAmt').innerText = '₹' + totalAmt.toLocaleString('en-IN');
+            
+            const growthEl = document.getElementById('sumGrowth');
+            const growthIcon = document.getElementById('growthIcon');
+            growthEl.innerText = (growth >= 0 ? '+' : '') + growth.toFixed(1) + "%";
+            growthEl.className = "text-3xl font-black " + (growth >= 0 ? 'text-emerald-400' : 'text-rose-400');
+            growthIcon.className = "w-6 h-6 " + (growth >= 0 ? 'text-emerald-400' : 'text-rose-400 rotate-180 transition-transform');
+
+            // Top Model Logic
+            let maxVal = -1;
+            let topM = "None";
+            rawData.models.forEach(mName => {
+                if (dataY2.data[mName].total[currentMetric] > maxVal) {
+                    maxVal = dataY2.data[mName].total[currentMetric];
+                    topM = mName;
+                }
+            });
+            document.getElementById('topModel').innerText = topM;
+        }
+
+        // Initialize
+        window.onload = () => {
+            render();
+            document.getElementById('updateTag').innerText = "LIVE: " + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric'});
+        };
+    </script>
+</body>
+</html>

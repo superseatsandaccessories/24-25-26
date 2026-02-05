@@ -59,7 +59,7 @@
                     <span id="updateTag" class="text-slate-400 text-[10px] font-medium uppercase tracking-widest">Updated Today</span>
                 </div>
                 <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Sales Intelligence Dashboard</h1>
-                <p id="subLabel" class="text-slate-500 mt-2 font-medium">Comparative Analysis of Multi-Month Performance Periods</p>
+                <p id="subLabel" class="text-slate-500 mt-2 font-medium">Comparative Analysis of Performance (Nov '24 - Mar '25 Baseline)</p>
             </div>
 
             <!-- Controls -->
@@ -69,10 +69,12 @@
                     <button id="viewMonthly" onclick="setView('monthly')" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 transition">Monthly Detail</button>
                 </div>
                 
-                <div id="monthSelector" class="hidden flex items-center bg-white p-1 rounded-xl shadow-sm border border-slate-200">
-                    <button id="mNov" onclick="setMonth(0)" class="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold transition active-tab">Nov</button>
-                    <button id="mDec" onclick="setMonth(1)" class="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 transition">Dec</button>
-                    <button id="mJan" onclick="setMonth(2)" class="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 transition">Jan</button>
+                <div id="monthSelector" class="hidden flex flex-wrap items-center bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+                    <button id="mNov" onclick="setMonth(0)" class="px-3 py-1.5 rounded-lg text-xs font-bold transition active-tab">Nov</button>
+                    <button id="mDec" onclick="setMonth(1)" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 transition">Dec</button>
+                    <button id="mJan" onclick="setMonth(2)" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 transition">Jan</button>
+                    <button id="mFeb" onclick="setMonth(3)" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 transition">Feb</button>
+                    <button id="mMar" onclick="setMonth(4)" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 transition">Mar</button>
                 </div>
 
                 <div class="flex items-center bg-white p-1 rounded-xl shadow-sm border border-slate-200">
@@ -84,7 +86,7 @@
 
         <!-- Comparative Grid -->
         <main class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
-            <!-- Previous Period -->
+            <!-- Baseline Period -->
             <section>
                 <div class="flex items-center justify-between mb-6">
                     <div>
@@ -111,12 +113,11 @@
 
         <!-- Dynamic Summary Footer -->
         <footer id="summaryBar" class="bg-slate-900 rounded-[2rem] p-8 md:p-10 shadow-2xl relative overflow-hidden transition-all duration-500">
-            <!-- Background Decorative Element -->
             <div class="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl"></div>
             
             <div class="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="border-l-2 border-indigo-500 pl-4">
-                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Total Period Volume</p>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Period Volume</p>
                     <div class="flex items-baseline gap-2">
                         <p id="sumQty" class="text-3xl font-black text-white">0</p>
                         <span class="text-xs text-slate-500 font-bold">Units</span>
@@ -124,12 +125,12 @@
                 </div>
 
                 <div class="border-l-2 border-indigo-500 pl-4">
-                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Total Period Revenue</p>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Period Revenue</p>
                     <p id="sumAmt" class="text-3xl font-black text-white">₹0</p>
                 </div>
 
                 <div class="border-l-2 border-indigo-500 pl-4">
-                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Net Growth (YoY)</p>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">YoY Growth</p>
                     <div class="flex items-center gap-2">
                         <p id="sumGrowth" class="text-3xl font-black text-emerald-400">+0%</p>
                         <svg id="growthIcon" class="w-6 h-6 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path></svg>
@@ -137,7 +138,7 @@
                 </div>
 
                 <div class="border-l-2 border-indigo-500 pl-4">
-                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Top Performing Model</p>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Top Volume Model</p>
                     <p id="topModel" class="text-xl font-extrabold text-indigo-300 truncate uppercase">N/A</p>
                 </div>
             </div>
@@ -147,75 +148,33 @@
     <script>
         const rawData = {
             models: ["IQUBE", "JUPITER 110", "JUPITER 113", "JUPITER 125", "NTORQ", "ZEST"],
-            P1: [ // Nov 24, Dec 24, Jan 25
-                { 
-                    month: "Nov '24",
-                    data: {
-                        "IQUBE": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 480, amt: 76800 }, matting: { qty: 455, amt: 72800 } },
-                        "JUPITER 110": { accessories: { qty: 10, amt: 7100 }, seatCover: { qty: 10, amt: 1600 }, matting: { qty: 10, amt: 1600 } },
-                        "JUPITER 113": { accessories: { qty: 120, amt: 88800 }, seatCover: { qty: 270, amt: 43200 }, matting: { qty: 250, amt: 40000 } },
-                        "JUPITER 125": { accessories: { qty: 15, amt: 10800 }, seatCover: { qty: 365, amt: 58400 }, matting: { qty: 485, amt: 77600 } },
-                        "NTORQ": { accessories: { qty: 10, amt: 7250 }, seatCover: { qty: 30, amt: 4800 }, matting: { qty: 10, amt: 1600 } },
-                        "ZEST": { accessories: { qty: 10, amt: 6800 }, seatCover: { qty: 70, amt: 11200 }, matting: { qty: 79, amt: 12640 } }
-                    }
-                },
-                { 
-                    month: "Dec '24",
-                    data: {
-                        "IQUBE": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 60, amt: 9600 }, matting: { qty: 60, amt: 9600 } },
-                        "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 20, amt: 3200 }, matting: { qty: 10, amt: 1600 } },
-                        "JUPITER 113": { accessories: { qty: 362, amt: 267880 }, seatCover: { qty: 1128, amt: 180480 }, matting: { qty: 662, amt: 105920 } },
-                        "JUPITER 125": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 359, amt: 57440 }, matting: { qty: 419, amt: 67040 } },
-                        "NTORQ": { accessories: { qty: 5, amt: 3625 }, seatCover: { qty: 15, amt: 2400 }, matting: { qty: 5, amt: 800 } },
-                        "ZEST": { accessories: { qty: 65, amt: 44200 }, seatCover: { qty: 35, amt: 5600 }, matting: { qty: 35, amt: 5600 } }
-                    }
-                },
-                { 
-                    month: "Jan '25",
-                    data: {
-                        "IQUBE": { accessories: { qty: 60, amt: 40500 }, seatCover: { qty: 235, amt: 37600 }, matting: { qty: 205, amt: 32800 } },
-                        "JUPITER 110": { accessories: { qty: 5, amt: 1900 }, seatCover: { qty: 1, amt: 160 }, matting: { qty: 1, amt: 160 } },
-                        "JUPITER 113": { accessories: { qty: 120, amt: 88800 }, seatCover: { qty: 120, amt: 19590 }, matting: { qty: 120, amt: 19200 } },
-                        "JUPITER 125": { accessories: { qty: 645, amt: 464400 }, seatCover: { qty: 465, amt: 74400 }, matting: { qty: 360, amt: 57600 } },
-                        "NTORQ": { accessories: { qty: 20, amt: 14500 }, seatCover: { qty: 20, amt: 3200 }, matting: { qty: 20, amt: 3200 } },
-                        "ZEST": { accessories: { qty: 30, amt: 20400 }, seatCover: { qty: 30, amt: 4800 }, matting: { qty: 30, amt: 4800 } }
-                    }
-                }
+            P1: [ 
+                { month: "Nov '24", data: { "IQUBE": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 480, amt: 76800 }, matting: { qty: 455, amt: 72800 } }, "JUPITER 110": { accessories: { qty: 10, amt: 7100 }, seatCover: { qty: 10, amt: 1600 }, matting: { qty: 10, amt: 1600 } }, "JUPITER 113": { accessories: { qty: 120, amt: 88800 }, seatCover: { qty: 270, amt: 43200 }, matting: { qty: 250, amt: 40000 } }, "JUPITER 125": { accessories: { qty: 15, amt: 10800 }, seatCover: { qty: 365, amt: 58400 }, matting: { qty: 485, amt: 77600 } }, "NTORQ": { accessories: { qty: 10, amt: 7250 }, seatCover: { qty: 30, amt: 4800 }, matting: { qty: 10, amt: 1600 } }, "ZEST": { accessories: { qty: 10, amt: 6800 }, seatCover: { qty: 70, amt: 11200 }, matting: { qty: 79, amt: 12640 } } } },
+                { month: "Dec '24", data: { "IQUBE": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 60, amt: 9600 }, matting: { qty: 60, amt: 9600 } }, "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 20, amt: 3200 }, matting: { qty: 10, amt: 1600 } }, "JUPITER 113": { accessories: { qty: 362, amt: 267880 }, seatCover: { qty: 1128, amt: 180480 }, matting: { qty: 662, amt: 105920 } }, "JUPITER 125": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 359, amt: 57440 }, matting: { qty: 419, amt: 67040 } }, "NTORQ": { accessories: { qty: 5, amt: 3625 }, seatCover: { qty: 15, amt: 2400 }, matting: { qty: 5, amt: 800 } }, "ZEST": { accessories: { qty: 65, amt: 44200 }, seatCover: { qty: 35, amt: 5600 }, matting: { qty: 35, amt: 5600 } } } },
+                { month: "Jan '25", data: { "IQUBE": { accessories: { qty: 60, amt: 40500 }, seatCover: { qty: 235, amt: 37600 }, matting: { qty: 205, amt: 32800 } }, "JUPITER 110": { accessories: { qty: 5, amt: 1900 }, seatCover: { qty: 1, amt: 160 }, matting: { qty: 1, amt: 160 } }, "JUPITER 113": { accessories: { qty: 120, amt: 88800 }, seatCover: { qty: 120, amt: 19590 }, matting: { qty: 120, amt: 19200 } }, "JUPITER 125": { accessories: { qty: 645, amt: 464400 }, seatCover: { qty: 465, amt: 74400 }, matting: { qty: 360, amt: 57600 } }, "NTORQ": { accessories: { qty: 20, amt: 14500 }, seatCover: { qty: 20, amt: 3200 }, matting: { qty: 20, amt: 3200 } }, "ZEST": { accessories: { qty: 30, amt: 20400 }, seatCover: { qty: 30, amt: 4800 }, matting: { qty: 30, amt: 4800 } } } },
+                { month: "Feb '25", data: { 
+                    "IQUBE": { accessories: { qty: 180, amt: 121500 }, seatCover: { qty: 340, amt: 54400 }, matting: { qty: 295, amt: 47200 } },
+                    "JUPITER 110": { accessories: { qty: 1, amt: 740 }, seatCover: { qty: 1, amt: 160 }, matting: { qty: 1, amt: 0 } },
+                    "JUPITER 113": { accessories: { qty: 300, amt: 222000 }, seatCover: { qty: 660, amt: 105600 }, matting: { qty: 400, amt: 64000 } },
+                    "JUPITER 125": { accessories: { qty: 285, amt: 205200 }, seatCover: { qty: 375, amt: 60000 }, matting: { qty: 590, amt: 94400 } },
+                    "NTORQ": { accessories: { qty: 5, amt: 3625 }, seatCover: { qty: 5, amt: 800 }, matting: { qty: 5, amt: 800 } },
+                    "ZEST": { accessories: { qty: 5, amt: 3400 }, seatCover: { qty: 5, amt: 800 }, matting: { qty: 5, amt: 800 } }
+                } },
+                { month: "Mar '25", data: { 
+                    "IQUBE": { accessories: { qty: 15, amt: 10125 }, seatCover: { qty: 365, amt: 58400 }, matting: { qty: 315, amt: 50400 } },
+                    "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } },
+                    "JUPITER 113": { accessories: { qty: 665, amt: 492100 }, seatCover: { qty: 865, amt: 138400 }, matting: { qty: 835, amt: 133600 } },
+                    "JUPITER 125": { accessories: { qty: 431, amt: 310080 }, seatCover: { qty: 580, amt: 92800 }, matting: { qty: 530, amt: 84800 } },
+                    "NTORQ": { accessories: { qty: 40, amt: 29000 }, seatCover: { qty: 40, amt: 6400 }, matting: { qty: 60, amt: 9600 } },
+                    "ZEST": { accessories: { qty: 80, amt: 54400 }, seatCover: { qty: 80, amt: 12800 }, matting: { qty: 95, amt: 15200 } }
+                } }
             ],
-            P2: [ // Nov 25, Dec 25, Jan 26
-                { 
-                    month: "Nov '25",
-                    data: {
-                        "IQUBE": { accessories: { qty: 50, amt: 33750 }, seatCover: { qty: 150, amt: 24000 }, matting: { qty: 127, amt: 20320 } },
-                        "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } },
-                        "JUPITER 113": { accessories: { qty: 151, amt: 111740 }, seatCover: { qty: 170, amt: 27200 }, matting: { qty: 120, amt: 19200 } },
-                        "JUPITER 125": { accessories: { qty: 109, amt: 78480 }, seatCover: { qty: 270, amt: 43200 }, matting: { qty: 300, amt: 48000 } },
-                        "NTORQ": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } },
-                        "ZEST": { accessories: { qty: 40, amt: 27200 }, seatCover: { qty: 60, amt: 9600 }, matting: { qty: 40, amt: 6400 } }
-                    }
-                },
-                { 
-                    month: "Dec '25",
-                    data: {
-                        "IQUBE": { accessories: { qty: 100, amt: 67500 }, seatCover: { qty: 200, amt: 32000 }, matting: { qty: 180, amt: 28800 } },
-                        "JUPITER 110": { accessories: { qty: 3, amt: 1440 }, seatCover: { qty: 4, amt: 2100 }, matting: { qty: 1, amt: 160 } },
-                        "JUPITER 113": { accessories: { qty: 120, amt: 88800 }, seatCover: { qty: 340, amt: 54400 }, matting: { qty: 240, amt: 38400 } },
-                        "JUPITER 125": { accessories: { qty: 200, amt: 144000 }, seatCover: { qty: 240, amt: 38400 }, matting: { qty: 480, amt: 76800 } },
-                        "NTORQ": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } },
-                        "ZEST": { accessories: { qty: 80, amt: 54400 }, seatCover: { qty: 140, amt: 22400 }, matting: { qty: 180, amt: 28800 } }
-                    }
-                },
-                { 
-                    month: "Jan '26",
-                    data: {
-                        "IQUBE": { accessories: { qty: 100, amt: 67500 }, seatCover: { qty: 400, amt: 64000 }, matting: { qty: 400, amt: 64000 } },
-                        "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } },
-                        "JUPITER 113": { accessories: { qty: 200, amt: 148000 }, seatCover: { qty: 340, amt: 54400 }, matting: { qty: 420, amt: 67200 } },
-                        "JUPITER 125": { accessories: { qty: 200, amt: 144000 }, seatCover: { qty: 300, amt: 48000 }, matting: { qty: 540, amt: 86400 } },
-                        "NTORQ": { accessories: { qty: 10, amt: 7250 }, seatCover: { qty: 10, amt: 1600 }, matting: { qty: 10, amt: 1600 } },
-                        "ZEST": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }
-                    }
-                }
+            P2: [ 
+                { month: "Nov '25", data: { "IQUBE": { accessories: { qty: 50, amt: 33750 }, seatCover: { qty: 150, amt: 24000 }, matting: { qty: 127, amt: 20320 } }, "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "JUPITER 113": { accessories: { qty: 151, amt: 111740 }, seatCover: { qty: 170, amt: 27200 }, matting: { qty: 120, amt: 19200 } }, "JUPITER 125": { accessories: { qty: 109, amt: 78480 }, seatCover: { qty: 270, amt: 43200 }, matting: { qty: 300, amt: 48000 } }, "NTORQ": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "ZEST": { accessories: { qty: 40, amt: 27200 }, seatCover: { qty: 60, amt: 9600 }, matting: { qty: 40, amt: 6400 } } } },
+                { month: "Dec '25", data: { "IQUBE": { accessories: { qty: 100, amt: 67500 }, seatCover: { qty: 200, amt: 32000 }, matting: { qty: 180, amt: 28800 } }, "JUPITER 110": { accessories: { qty: 3, amt: 1440 }, seatCover: { qty: 4, amt: 2100 }, matting: { qty: 1, amt: 160 } }, "JUPITER 113": { accessories: { qty: 120, amt: 88800 }, seatCover: { qty: 340, amt: 54400 }, matting: { qty: 240, amt: 38400 } }, "JUPITER 125": { accessories: { qty: 200, amt: 144000 }, seatCover: { qty: 240, amt: 38400 }, matting: { qty: 480, amt: 76800 } }, "NTORQ": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "ZEST": { accessories: { qty: 80, amt: 54400 }, seatCover: { qty: 140, amt: 22400 }, matting: { qty: 180, amt: 28800 } } } },
+                { month: "Jan '26", data: { "IQUBE": { accessories: { qty: 100, amt: 67500 }, seatCover: { qty: 400, amt: 64000 }, matting: { qty: 400, amt: 64000 } }, "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "JUPITER 113": { accessories: { qty: 200, amt: 148000 }, seatCover: { qty: 340, amt: 54400 }, matting: { qty: 420, amt: 67200 } }, "JUPITER 125": { accessories: { qty: 200, amt: 144000 }, seatCover: { qty: 300, amt: 48000 }, matting: { qty: 540, amt: 86400 } }, "NTORQ": { accessories: { qty: 10, amt: 7250 }, seatCover: { qty: 10, amt: 1600 }, matting: { qty: 10, amt: 1600 } }, "ZEST": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } } } },
+                { month: "Feb '26 (Est)", data: { "IQUBE": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "JUPITER 113": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "JUPITER 125": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "NTORQ": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "ZEST": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } } } },
+                { month: "Mar '26 (Est)", data: { "IQUBE": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "JUPITER 110": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "JUPITER 113": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "JUPITER 125": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "NTORQ": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } }, "ZEST": { accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 } } } }
             ]
         };
 
@@ -230,23 +189,23 @@
                 ms.classList.add('hidden');
                 document.getElementById('viewAgg').classList.add('active-tab');
                 document.getElementById('viewMonthly').classList.remove('active-tab');
-                document.getElementById('subLabel').innerText = "Full Period Comparative Analysis (Nov - Jan)";
+                document.getElementById('subLabel').innerText = "Combined Period Analysis (Nov '24 - Mar '25)";
             } else {
                 ms.classList.remove('hidden');
                 document.getElementById('viewMonthly').classList.add('active-tab');
                 document.getElementById('viewAgg').classList.remove('active-tab');
-                document.getElementById('subLabel').innerText = "Specific Month Detail for " + rawData.P2[currentMonthIdx].month;
+                document.getElementById('subLabel').innerText = "Monthly Detail for " + rawData.P1[currentMonthIdx].month;
             }
             render();
         }
 
         function setMonth(m) {
             currentMonthIdx = m;
-            ['mNov', 'mDec', 'mJan'].forEach((id, i) => {
+            ['mNov', 'mDec', 'mJan', 'mFeb', 'mMar'].forEach((id, i) => {
                 document.getElementById(id).classList.toggle('active-tab', i === m);
                 document.getElementById(id).classList.toggle('text-slate-500', i !== m);
             });
-            document.getElementById('subLabel').innerText = "Specific Month Detail for " + rawData.P2[currentMonthIdx].month;
+            document.getElementById('subLabel').innerText = "Monthly Detail for " + rawData.P1[currentMonthIdx].month;
             render();
         }
 
@@ -274,16 +233,13 @@
                 return processed;
             } else {
                 const processed = { 
-                    month: period === 'P1' ? "Nov '24 - Jan '25" : "Nov '25 - Jan '26", 
+                    month: period === 'P1' ? "Nov '24 - Mar '25" : "Nov '25 - Mar '26", 
                     data: {}, 
                     total: { qty: 0, amt: 0 } 
                 };
                 rawData.models.forEach(mName => {
                     processed.data[mName] = { 
-                        accessories: { qty: 0, amt: 0 }, 
-                        seatCover: { qty: 0, amt: 0 }, 
-                        matting: { qty: 0, amt: 0 },
-                        total: { qty: 0, amt: 0 }
+                        accessories: { qty: 0, amt: 0 }, seatCover: { qty: 0, amt: 0 }, matting: { qty: 0, amt: 0 }, total: { qty: 0, amt: 0 }
                     };
                     rawData[period].forEach(month => {
                         const m = month.data[mName];
@@ -318,19 +274,21 @@
                 card.className = "bg-white p-6 rounded-2xl border border-slate-100 shadow-sm print-card card-hover transition-all duration-300";
                 
                 let growthHTML = '';
-                if (isY2 && comparisonData) {
+                if (isY2 && comparisonData && comparisonData[currentMetric] > 0) {
                     const v1 = comparisonData[currentMetric];
                     const v2 = m.total[currentMetric];
-                    if (v1 > 0) {
+                    if (v2 > 0) {
                         const diff = ((v2 - v1) / v1) * 100;
                         const isPos = diff >= 0;
                         growthHTML = `
                             <span class="text-[10px] font-bold ${isPos ? 'text-emerald-500 bg-emerald-50' : 'text-rose-500 bg-rose-50'} px-2 py-0.5 rounded-full">
                                 ${isPos ? '↑' : '↓'} ${Math.abs(diff).toFixed(0)}%
                             </span>`;
-                    } else if (v2 > 0) {
-                        growthHTML = `<span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">NEW</span>`;
+                    } else {
+                        growthHTML = `<span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">NO DATA</span>`;
                     }
+                } else if (isY2 && m.total[currentMetric] > 0) {
+                    growthHTML = `<span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">NEW</span>`;
                 }
 
                 card.innerHTML = `
@@ -372,7 +330,6 @@
                 return card;
             };
 
-            // Render columns
             const g1 = document.getElementById('gridY1');
             const g2 = document.getElementById('gridY2');
             g1.innerHTML = ''; g2.innerHTML = '';
@@ -382,35 +339,40 @@
                 g2.appendChild(createCard(mName, dataY2.data[mName], dataY1.data[mName].total, true));
             });
 
-            // Summary Footer Logic
+            // Summary Footer
             const totalQty = dataY2.total.qty;
             const totalAmt = dataY2.total.amt;
             const prevMetric = dataY1.total[currentMetric];
             const currMetric = dataY2.total[currentMetric];
-            const growth = prevMetric > 0 ? ((currMetric - prevMetric) / prevMetric) * 100 : 0;
+            const growth = prevMetric > 0 && currMetric > 0 ? ((currMetric - prevMetric) / prevMetric) * 100 : 0;
 
-            document.getElementById('sumQty').innerText = totalQty.toLocaleString();
-            document.getElementById('sumAmt').innerText = '₹' + totalAmt.toLocaleString('en-IN');
+            document.getElementById('sumQty').innerText = (currMetric > 0 ? totalQty : dataY1.total.qty).toLocaleString();
+            document.getElementById('sumAmt').innerText = '₹' + (currMetric > 0 ? totalAmt : dataY1.total.amt).toLocaleString('en-IN');
             
             const growthEl = document.getElementById('sumGrowth');
             const growthIcon = document.getElementById('growthIcon');
-            growthEl.innerText = (growth >= 0 ? '+' : '') + growth.toFixed(1) + "%";
-            growthEl.className = "text-3xl font-black " + (growth >= 0 ? 'text-emerald-400' : 'text-rose-400');
-            growthIcon.className = "w-6 h-6 " + (growth >= 0 ? 'text-emerald-400' : 'text-rose-400 rotate-180 transition-transform');
+            if (currMetric > 0 && prevMetric > 0) {
+                growthEl.innerText = (growth >= 0 ? '+' : '') + growth.toFixed(1) + "%";
+                growthEl.className = "text-3xl font-black " + (growth >= 0 ? 'text-emerald-400' : 'text-rose-400');
+                growthIcon.classList.remove('hidden');
+            } else {
+                growthEl.innerText = "N/A";
+                growthEl.className = "text-3xl font-black text-slate-500";
+                growthIcon.classList.add('hidden');
+            }
 
-            // Top Model Logic
             let maxVal = -1;
             let topM = "None";
+            const targetData = currMetric > 0 ? dataY2 : dataY1;
             rawData.models.forEach(mName => {
-                if (dataY2.data[mName].total[currentMetric] > maxVal) {
-                    maxVal = dataY2.data[mName].total[currentMetric];
+                if (targetData.data[mName].total[currentMetric] > maxVal) {
+                    maxVal = targetData.data[mName].total[currentMetric];
                     topM = mName;
                 }
             });
             document.getElementById('topModel').innerText = topM;
         }
 
-        // Initialize
         window.onload = () => {
             render();
             document.getElementById('updateTag').innerText = "LIVE: " + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric'});
